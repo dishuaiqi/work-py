@@ -2,6 +2,7 @@ import time
 import pandas as pd
 import os
 from string import digits
+import numpy as np
 
 
 files=[]
@@ -59,12 +60,20 @@ for file1 in files:
     #     场区 = '工程部'
     if '生物安全' in str(场区) and "阜阳" not in str(场区) :
         场区='工程部'
+    if '障' in str(场区) and "阜阳" not in str(场区) :
+        场区='工程部'
+        print(场区)
     if "李相君"in file1:
         场区 = str(file1).split('(')[1][:-7]
         print(场区)
     if '马店区' in str(场区) :
         场区='马店育肥场'
-
+    if  str(场区) =='集母猪场':
+        场区='董集母猪场'
+#	if '保障部' in str(场区)：
+#		场区='生物安全保障部'
+    if  str(场区[:2]) =='务部':
+        场区=str(场区[2:])
     if str(场区)=='利辛服务部':
         if '利辛服务部' in file1:
             场区='利辛服务部'
@@ -77,13 +86,13 @@ for file1 in files:
     if '备注' not in 列总2:
 
         备注 = 样本信息[列总[2]]
-    #     备注=样本信息['备注']
-    # elif str(场区) == '工程部':
-    #     备注=样本信息['备注']
-    # elif '马店母猪场' == str(场区):
-    #     备注 = 样本信息['备注']
-    # elif '巩店公猪站' == str(场区):
-    #     备注 = 样本信息['备注']
+
+    elif str(场区) =='环保部':
+
+        备注 = 样本信息[列总[2]]
+    elif str(场区) =='城北母猪场':
+
+        备注 = 样本信息[列总[2]]
     else:
 
         备注 = 样本信息['备注']
@@ -130,20 +139,29 @@ for file1 in files:
     if str(场区) == '工程部' :  # 生物安全工程部
         样本信息 = 样本信息[~(样本信息['名字'].isnull())]
         样本信息.index = range(len(样本信息['名字']))
-        # print(样本信息)
+        print(样本信息)
         # print(混检索引)
         名字=样本信息['名字'].tolist()
         场区1=样本信息['场区'].tolist()
-        if  str(样本信息['名字'].tolist()[-1]):  # 判断最后一行是否有备注
-            样品编号 = 样本信息['样品编号'][:-1].tolist()
-        else:
-            样品编号 = 样本信息['样品编号'].tolist()
-        混检索引2 = list(样本信息.loc[备注.str.contains('混', na=False)].index)
-        混检索引1 = list(样本信息.loc[备注.str.contains('单', na=False)].index)
-        # 混检索引1=list(样本信息.loc[备注.str.contains('非瘟',na=False)].index)
+        # if  str(样本信息['名字'].tolist()[-1]):  # 判断最后一行是否有备注
+        #     样品编号 = 样本信息['样品编号'][:-1].tolist()
+        #     print(样品编号)
+        # else:
+        样品编号 = 样本信息['样品编号'].tolist()
+        print(样品编号)
+        混检索引=[]
+        for i in range(len(样本信息['备注'])):
+            if pd.isna(样本信息['备注'][i]) == False:
 
-        混检索引 = 混检索引2 + 混检索引1
-
+                混检索引.append(i)  #找到不等于空值的备注索引
+        # print(混检索引)
+        # 混检索引2 = list(样本信息.loc[备注.str.contains('混', na=False)].index)
+        # 混检索引1 = list(样本信息.loc[备注.str.contains('单', na=False)].index)
+        #
+        # # 混检索引1=list(样本信息.loc[备注.str.contains('非瘟',na=False)].index)
+        #
+        # 混检索引 = 混检索引2 + 混检索引1
+        print(混检索引)
         # print(混检索引)
         if len(混检索引) > 1:
             for i in range(len(混检索引) - 1):
@@ -158,6 +176,7 @@ for file1 in files:
                 样品.append(str('工程部') + str(场区1[混检索引[-1]]) + str(样品类型[混检索引[-1]]) + str(名字[-1]))
             else:
                 样品.append(str('工程部') + str(场区1[混检索引[-1]]) + str(样品类型[混检索引[-1]]) + str(名字[混检索引[-1]]) + '、' + str(名字[-1]))
+            print(样品)
             # 样品.append(str('工程部'))
         else:
             if len(名字)>1:
@@ -167,40 +186,7 @@ for file1 in files:
                     样品.append(str('工程部') + str(场区1[混检索引[-1]]) + str(名字[混检索引[-1]]) + str(名字[-1]))
             else:
                 样品.append(str('工程部') + str(场区1[0]) + str(名字[混检索引[0]]))
-        allf.extend(样品)
-
-    elif '督查部' in file1 and '徐恩培' not in pd.read_excel(file1)['安徽禾丰检测送样单'][3] :
-
-
-        列 = 样本信息.columns.values
-        for i in 列:
-            if "采样" in i :
-                # print(i)
-                采样环境 = 样本信息[i].tolist()
-        # 采样环境 = 样本信息[列[3]].tolist()
-
-
-        if len(混检索引) > 1:
-            for i in range(len(混检索引) - 1):
-                if str(样品编号[混检索引[i]]) == str(样品编号[混检索引[i + 1] - 1]):
-                    样品.append(str(场区) + str(采样环境[混检索引[i]])+str(样品类型[混检索引[i]]) + str(样品编号[混检索引[i]]))
-                else:
-                    样品.append(str(场区) + str(采样环境[混检索引[i]])+str(样品类型[混检索引[i]]) + str(样品编号[混检索引[i]]) + '-' + str(样品编号[混检索引[i + 1] - 1]))
-
-            if str(样品编号[-1]) == 'nan':
-                样品.append(str(场区) +str(采样环境[混检索引[-1]])+ str(样品编号[混检索引[-1]]))
-            # print(样本信息)
-            # print(混检索引)
-            # print(样品类型[混检索引[-1]])
-
-            样品.append(str(场区) + str(采样环境[混检索引[-1]])+str(样品类型[混检索引[-1]]) + str(样品编号[混检索引[-1]]) + '-' + str(样品编号[-1]))
-
-        else:
-            if str(样品编号[0]) == str(样品编号[-1]):
-                样品.append(str(场区) + str(采样环境[混检索引[0]])+str(样品类型[0]) + str(样品编号[0]))
-            else:
-                样品.append(str(场区) + str(采样环境[混检索引[0]])+str(样品类型[0]) + str(样品编号[0]) + '-' + str(样品编号[-1]))
-            # 样品.append(str(场区) + str(样品类型[0]+str(样品编号[0])))
+        print(样品)
         allf.extend(样品)
 
 
