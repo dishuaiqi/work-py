@@ -139,6 +139,8 @@ for file1 in files:
 
     样品 = []
     if str(场区) == '工程部' :  # 生物安全工程部
+        if 样本信息.columns[1] =='姓名':
+            样本信息.rename(columns={'姓名':'名字'},inplace=True)
         样本信息 = 样本信息[~(样本信息['名字'].isnull())]
         样本信息.index = range(len(样本信息['名字']))
         print(样本信息)
